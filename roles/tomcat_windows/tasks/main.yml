@@ -1,0 +1,69 @@
+---
+- name: Create Tomcat build directory
+  ansible.windows.win_file:
+    path: "{{ tomcat_download_directory }}"
+    state: directory
+
+- name: Download approved Java archive
+  ansible.windows.win_get_url:
+    url: "{{ java_package_url }}"
+    dest: "{{ tomcat_java_archive }}"
+    checksum: "{{ java_package_checksum.split(':', 1)[1] }}"
+    checksum_algorithm: sha256
+
+- name: Download approved Tomcat archive
+  ansible.windows.win_get_url:
+    url: "{{ tomcat_package_url }}"
+    dest: "{{ tomcat_archive }}"
+    checksum: "{{ tomcat_package_checksum.split(':', 1)[1] }}"
+    checksum_algorithm: sha256
+
+- name: Expand Java
+  community.windows.win_unzip:
+    src: "{{ tomcat_java_archive }}"
+    dest: "{{ tomcat_java_home }}"
+    creates: '{{ tomcat_java_home }}\bin\java.exe'
+
+- name: Expand Tomcat
+  community.windows.win_unzip:
+    src: "{{ tomcat_archive }}"
+    dest: "{{ tomcat_install_root }}"
+    creates: '{{ tomcat_install_root }}\bin\catalina.bat'
+
+- name: Render server.xml
+  ansible.windows.win_template:
+    src: server.xml.j2
+    dest: '{{ tomcat_install_root }}\conf\server.xml'
+  notify: Restart Tomcat
+
+- name: Install Tomcat Windows service
+  ansible.windows.win_command: >-
+    {{ tomcat_install_root }}\bin\service.bat install {{ tomcat_service_name }}
+  args:
+    creates: 'HKLM:\SYSTEM\CurrentControlSet\Services\{{ tomcat_service_name }}'
+  environment:
+    JAVA_HOME: "{{ tomcat_java_home }}"
+    CATALINA_HOME: "{{ tomcat_install_root }}"
+
+- name: Configure Tomcat service
+  ansible.windows.win_service:
+    name: "{{ tomcat_service_name }}"
+    display_name: "{{ tomcat_service_display_name }}"
+    description: "{{ tomcat_service_description }}"
+    start_mode: auto
+    state: started
+
+- name: Open Tomcat firewall port
+  community.windows.win_firewall_rule:
+    name: "Tomcat {{ tomcat_http_port }}"
+    localport: "{{ tomcat_http_port }}"
+    action: allow
+    direction: in
+    protocol: tcp
+    state: present
+    enabled: true
+
+- name: Wait for Tomcat listener
+  ansible.windows.win_wait_for:
+    port: "{{ tomcat_http_port }}"
+    timeout: 120

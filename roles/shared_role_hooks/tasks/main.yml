@@ -1,0 +1,13 @@
+---
+- name: Display shared-role integration boundary
+  ansible.builtin.debug:
+    msg:
+      - "Phase: {{ shared_role_phase }}"
+      - "Replace this hook with existing approved platform roles."
+      - "Do not duplicate VMware, BlueCat, OS-baseline, agent or onboarding logic here."
+
+- name: Record shared-role phase completion
+  ansible.builtin.set_fact:
+    shared_role_phase_results: >-
+      {{ (shared_role_phase_results | default({})) |
+         combine({shared_role_phase: 'integration hook reached'}) }}

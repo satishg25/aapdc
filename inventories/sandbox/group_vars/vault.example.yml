@@ -1,0 +1,8 @@
+---
+# Encrypt the real file with ansible-vault. Do not commit real values.
+vault_windows_admin_user: DOMAIN\svc_ansible
+vault_windows_admin_password: CHANGE_ME
+vault_linux_admin_password: CHANGE_ME
+vault_hacluster_password: CHANGE_ME
+vault_tomcat_keystore_password: CHANGE_ME
+vault_integration_tokens: {}

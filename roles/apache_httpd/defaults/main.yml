@@ -1,0 +1,6 @@
+---
+apache_package_name: httpd
+apache_service_name: httpd
+apache_config_test_command: /usr/sbin/httpd -t
+apache_log_directory: /var/log/httpd
+apache_health_content: "OK - {{ request_id }}"

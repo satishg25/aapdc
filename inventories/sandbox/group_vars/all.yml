@@ -1,0 +1,78 @@
+---
+request_id: REQ-SANDBOX-0001
+environment: sandbox
+requestor: satish.gurushanthappa@example.invalid
+requested_use_case: 19
+
+catalogue_contract:
+  '19':
+    topology: standalone
+    product: tomcat
+    inventory_group: tomcat_windows
+    expected_nodes: 1
+  '22':
+    topology: ha
+    product: apache
+    inventory_group: apache_ha
+    expected_nodes: 2
+  '23':
+    topology: standalone
+    product: apache
+    inventory_group: apache_standalone
+    expected_nodes: 1
+
+# Existing platform capabilities. Replace these placeholders with real shared roles.
+shared_platform_roles:
+  - environment_selection
+  - naming
+  - network_selection
+  - ip_reservation
+  - image_selection
+  - vm_folder
+  - vm_create
+  - disk
+  - adapter
+  - vmtools
+  - os_baseline
+  - agent_installation
+  - cmdb
+  - backup
+  - cyberark
+  - security_onboarding
+  - monitoring
+  - valuemation_cloudstudio
+  - email
+
+apache_http_port: 80
+apache_https_port: 443
+apache_server_name: apache-sandbox.example.invalid
+apache_document_root: /var/www/sandbox
+apache_health_path: /health
+apache_tls_enabled: false
+apache_tls_certificate_path: /etc/pki/tls/certs/apache.crt
+apache_tls_private_key_path: /etc/pki/tls/private/apache.key
+
+ha_cluster_name: apache-sandbox-cluster
+ha_nodes:
+  - apache-ha-01
+  - apache-ha-02
+ha_vip_address: 192.0.2.220
+ha_vip_cidr: 24
+ha_resource_group: apache-group
+ha_stonith_enabled: false
+ha_no_quorum_policy: stop
+
+java_package_url: https://artifacts.example.invalid/java/jdk17.zip
+java_package_checksum: sha256:REPLACE_WITH_APPROVED_CHECKSUM
+tomcat_package_url: https://artifacts.example.invalid/tomcat/apache-tomcat-9.zip
+tomcat_package_checksum: sha256:REPLACE_WITH_APPROVED_CHECKSUM
+tomcat_install_root: C:\Apps\Tomcat9
+tomcat_java_home: C:\Apps\Java\jdk-17
+tomcat_service_name: Tomcat9
+tomcat_http_port: 8080
+tomcat_shutdown_port: 8005
+tomcat_tls_enabled: false
+tomcat_https_port: 8443
+tomcat_keystore_path: C:\secure\tomcat.pfx
+
+uc23_scope_correction_approved: false

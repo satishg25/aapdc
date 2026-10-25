@@ -1,0 +1,52 @@
+---
+- name: Install HA packages
+  ansible.builtin.package:
+    name: "{{ ha_packages }}"
+    state: present
+
+- name: Set hacluster password
+  ansible.builtin.user:
+    name: "{{ ha_cluster_user }}"
+    password: "{{ vault_hacluster_password | password_hash('sha512') }}"
+  no_log: true
+
+- name: Enable pcsd
+  ansible.builtin.service:
+    name: pcsd
+    enabled: true
+    state: started
+
+- name: Authenticate cluster nodes
+  ansible.builtin.command: >-
+    pcs host auth {{ ha_nodes | join(' ') }}
+    -u {{ ha_cluster_user }} -p {{ vault_hacluster_password }}
+  no_log: true
+  run_once: true
+  changed_when: true
+
+- name: Configure and start cluster
+  ansible.builtin.command: >-
+    pcs cluster setup {{ ha_cluster_name }} {{ ha_nodes | join(' ') }} --start --enable
+  run_once: true
+  args:
+    creates: /etc/corosync/corosync.conf
+
+- name: Set quorum policy
+  ansible.builtin.command: "pcs property set no-quorum-policy={{ ha_no_quorum_policy }}"
+  run_once: true
+  changed_when: true
+
+- name: Enforce fencing decision
+  ansible.builtin.assert:
+    that: ha_stonith_enabled | bool
+    fail_msg: >-
+      Approved STONITH configuration is required for production. Keep false only
+      for an isolated sandbox and do not promote this setting.
+  when: environment != 'sandbox'
+
+- name: Validate cluster communication
+  ansible.builtin.command: pcs status nodes
+  register: pcs_nodes
+  changed_when: false
+  failed_when: pcs_nodes.rc != 0
+  run_once: true

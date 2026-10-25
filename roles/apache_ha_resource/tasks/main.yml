@@ -1,0 +1,32 @@
+---
+- name: Create cluster VIP resource
+  ansible.builtin.command: >-
+    pcs resource create {{ ha_vip_resource }} ocf:heartbeat:IPaddr2
+    ip={{ ha_vip_address }} cidr_netmask={{ ha_vip_cidr }}
+    op monitor interval=30s
+  register: vip_create
+  changed_when: vip_create.rc == 0
+  failed_when: vip_create.rc != 0 and 'already exists' not in vip_create.stderr
+
+- name: Create Apache systemd resource
+  ansible.builtin.command: >-
+    pcs resource create {{ apache_cluster_resource }} {{ apache_cluster_agent }}
+    op monitor interval=30s
+  register: apache_resource_create
+  changed_when: apache_resource_create.rc == 0
+  failed_when: >-
+    apache_resource_create.rc != 0 and
+    'already exists' not in apache_resource_create.stderr
+
+- name: Group VIP before Apache
+  ansible.builtin.command: >-
+    pcs resource group add {{ ha_resource_group }}
+    {{ ha_vip_resource }} {{ apache_cluster_resource }}
+  register: group_create
+  changed_when: group_create.rc == 0
+  failed_when: group_create.rc != 0 and 'already exists' not in group_create.stderr
+
+- name: Validate resource status
+  ansible.builtin.command: pcs status resources
+  register: resource_status
+  changed_when: false

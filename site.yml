@@ -1,0 +1,18 @@
+---
+- name: Validate requested catalogue use case
+  hosts: localhost
+  gather_facts: false
+  roles:
+    - role: request_validation
+
+- name: Import UC19 Windows Tomcat workflow
+  ansible.builtin.import_playbook: playbooks/uc19_tomcat_windows.yml
+  when: requested_use_case | string == '19'
+
+- name: Import UC22 Apache HA workflow
+  ansible.builtin.import_playbook: playbooks/uc22_apache_ha.yml
+  when: requested_use_case | string == '22'
+
+- name: Import UC23 standalone Apache workflow
+  ansible.builtin.import_playbook: playbooks/uc23_apache_standalone.yml
+  when: requested_use_case | string == '23'

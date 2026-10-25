@@ -1,0 +1,33 @@
+---
+- name: Validate standalone Apache endpoint
+  ansible.builtin.uri:
+    url: "http://127.0.0.1:{{ apache_http_port }}{{ apache_health_path }}"
+    status_code: 200
+    return_content: true
+  register: apache_health
+  failed_when: request_id not in apache_health.content
+  when: validation_profile == 'apache_standalone'
+
+- name: Validate Tomcat endpoint
+  ansible.windows.win_uri:
+    url: "http://127.0.0.1:{{ tomcat_http_port }}/"
+    status_code: 200
+  when: validation_profile == 'tomcat_windows'
+
+- name: Validate Apache HA resources
+  ansible.builtin.command: pcs status --full
+  register: ha_status
+  changed_when: false
+  failed_when:
+    - ha_status.rc != 0
+    - ha_vip_resource not in ha_status.stdout
+    - apache_cluster_resource not in ha_status.stdout
+  when: validation_profile == 'apache_ha'
+
+- name: Record acceptance result
+  ansible.builtin.set_fact:
+    catalogue_acceptance:
+      request_id: "{{ request_id }}"
+      use_case: "{{ requested_use_case }}"
+      profile: "{{ validation_profile }}"
+      status: passed

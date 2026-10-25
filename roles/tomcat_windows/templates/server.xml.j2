@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Server port="{{ tomcat_shutdown_port }}" shutdown="SHUTDOWN">
+  <Service name="Catalina">
+    <Connector port="{{ tomcat_http_port }}" protocol="HTTP/1.1"
+               connectionTimeout="20000" redirectPort="{{ tomcat_https_port }}" />
+{% if tomcat_tls_enabled | bool %}
+    <Connector port="{{ tomcat_https_port }}" protocol="org.apache.coyote.http11.Http11NioProtocol"
+               SSLEnabled="true" maxThreads="200">
+      <SSLHostConfig>
+        <Certificate certificateKeystoreFile="{{ tomcat_keystore_path }}"
+                     certificateKeystorePassword="{{ vault_tomcat_keystore_password }}"
+                     type="RSA" />
+      </SSLHostConfig>
+    </Connector>
+{% endif %}
+    <Engine name="Catalina" defaultHost="localhost">
+      <Host name="localhost" appBase="webapps" unpackWARs="true" autoDeploy="true" />
+    </Engine>
+  </Service>
+</Server>

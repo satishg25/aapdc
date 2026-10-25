@@ -1,0 +1,22 @@
+---
+- name: UC22 dual-node RHEL provisioning and baseline
+  hosts: apache_ha
+  gather_facts: true
+  roles:
+    - role: shared_role_hooks
+      vars:
+        shared_role_phase: rhel_ha_provisioning_and_baseline
+    - role: linux_ha
+    - role: apache_httpd
+
+- name: UC22 create Apache HA resources
+  hosts: apache_ha[0]
+  gather_facts: false
+  roles:
+    - role: apache_ha_resource
+    - role: shared_role_hooks
+      vars:
+        shared_role_phase: operational_onboarding
+    - role: acceptance_validation
+      vars:
+        validation_profile: apache_ha

@@ -1,0 +1,15 @@
+*.retry
+*.log
+.vault_pass
+vault.yml
+vault-*.yml
+!vault.example.yml
+*.pem
+*.key
+*.pfx
+*.p12
+certificates/
+.local/
+.idea/
+.vscode/
+__pycache__/

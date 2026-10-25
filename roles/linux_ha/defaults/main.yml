@@ -1,0 +1,7 @@
+---
+ha_packages:
+  - pacemaker
+  - corosync
+  - pcs
+  - fence-agents-all
+ha_cluster_user: hacluster

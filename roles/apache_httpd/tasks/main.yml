@@ -1,0 +1,51 @@
+---
+- name: Install Apache and TLS support
+  ansible.builtin.package:
+    name:
+      - "{{ apache_package_name }}"
+      - mod_ssl
+    state: present
+
+- name: Create document root
+  ansible.builtin.file:
+    path: "{{ apache_document_root }}"
+    state: directory
+    owner: apache
+    group: apache
+    mode: '0755'
+
+- name: Publish health endpoint
+  ansible.builtin.copy:
+    dest: "{{ apache_document_root }}{{ apache_health_path }}"
+    content: "{{ apache_health_content }}"
+    owner: apache
+    group: apache
+    mode: '0644'
+  notify: Restart Apache
+
+- name: Configure sandbox virtual host
+  ansible.builtin.template:
+    src: sandbox.conf.j2
+    dest: /etc/httpd/conf.d/sandbox.conf
+    owner: root
+    group: root
+    mode: '0644'
+  notify: Restart Apache
+
+- name: Configure firewall services
+  ansible.posix.firewalld:
+    service: "{{ item }}"
+    permanent: true
+    immediate: true
+    state: enabled
+  loop: "{{ ['http'] + (['https'] if apache_tls_enabled | bool else []) }}"
+
+- name: Validate Apache configuration
+  ansible.builtin.command: "{{ apache_config_test_command }}"
+  changed_when: false
+
+- name: Enable and start Apache
+  ansible.builtin.service:
+    name: "{{ apache_service_name }}"
+    enabled: true
+    state: started

@@ -1,0 +1,24 @@
+Listen {{ apache_http_port }}
+<VirtualHost *:{{ apache_http_port }}>
+    ServerName {{ apache_server_name }}
+    DocumentRoot {{ apache_document_root }}
+    ErrorLog {{ apache_log_directory }}/sandbox_error.log
+    CustomLog {{ apache_log_directory }}/sandbox_access.log combined
+
+    <Directory "{{ apache_document_root }}">
+        Require all granted
+        Options -Indexes
+        AllowOverride None
+    </Directory>
+</VirtualHost>
+
+{% if apache_tls_enabled | bool %}
+Listen {{ apache_https_port }} https
+<VirtualHost *:{{ apache_https_port }}>
+    ServerName {{ apache_server_name }}
+    DocumentRoot {{ apache_document_root }}
+    SSLEngine on
+    SSLCertificateFile {{ apache_tls_certificate_path }}
+    SSLCertificateKeyFile {{ apache_tls_private_key_path }}
+</VirtualHost>
+{% endif %}

@@ -1,0 +1,15 @@
+---
+name: Ansible lint
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ansible/ansible-lint@main
+        with:
+          args: "--profile production ."

@@ -1,0 +1,24 @@
+---
+- name: UC23 RHEL 8.x standalone with Apache httpd 2.x
+  hosts: apache_standalone
+  gather_facts: true
+  pre_tasks:
+    - name: Require formal correction of the source workflow
+      ansible.builtin.assert:
+        that: uc23_scope_correction_approved | bool
+        fail_msg: >-
+          UC23 is labelled standalone Apache, but the supplied workflow ends with
+          four DB2 cluster activities. Set uc23_scope_correction_approved=true
+          only after the catalogue owner approves the corrected Apache scope.
+
+  roles:
+    - role: shared_role_hooks
+      vars:
+        shared_role_phase: rhel_standalone_provisioning_and_baseline
+    - role: apache_httpd
+    - role: shared_role_hooks
+      vars:
+        shared_role_phase: operational_onboarding
+    - role: acceptance_validation
+      vars:
+        validation_profile: apache_standalone
