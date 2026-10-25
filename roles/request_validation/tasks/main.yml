@@ -1,13 +1,42 @@
 ---
-- name: Display shared-role integration boundary
-  ansible.builtin.debug:
-    msg:
-      - "Phase: {{ shared_role_phase }}"
-      - "Replace this hook with existing approved platform roles."
-      - "Do not duplicate VMware, BlueCat, OS-baseline, agent or onboarding logic here."
+- name: Validate supported use case
+  ansible.builtin.assert:
+    that:
+      - requested_use_case is defined
+      - requested_use_case | string in catalogue_contract
+    fail_msg: "requested_use_case must be one of 19a, 19b, 22 or 23"
 
-- name: Record shared-role phase completion
+- name: Load selected use-case contract
   ansible.builtin.set_fact:
-    shared_role_phase_results: >-
-      {{ (shared_role_phase_results | default({})) |
-         combine({shared_role_phase: 'integration hook reached'}) }}
+    selected_contract: "{{ catalogue_contract[requested_use_case | string] }}"
+
+- name: Validate request metadata
+  ansible.builtin.assert:
+    that:
+      - request_id | default('') | length > 0
+      - environment | default('') | length > 0
+      - requestor | default('') | length > 0
+      - groups[selected_contract.inventory_group] | default([]) | length == selected_contract.expected_nodes
+
+- name: Validate common HA inputs
+  ansible.builtin.assert:
+    that:
+      - selected_contract.expected_nodes == 2
+  when: selected_contract.topology == 'ha'
+
+- name: Validate Windows Tomcat HA inputs
+  ansible.builtin.assert:
+    that:
+      - tomcat_ha_nodes | length == 2
+      - tomcat_ha_vip_address | ansible.utils.ipaddr
+      - tomcat_ha_integration_role | default('') | length > 0
+  when: selected_contract.ha_type == 'shared_platform'
+
+- name: Validate Linux cluster inputs
+  ansible.builtin.assert:
+    that:
+      - ha_cluster_name | length > 0
+      - ha_vip_address | ansible.utils.ipaddr
+      - ha_nodes | length == 2
+      - vault_hacluster_password | default('') | length > 0
+  when: selected_contract.ha_type == 'linux_cluster'

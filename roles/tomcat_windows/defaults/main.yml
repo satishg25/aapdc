@@ -3,5 +3,5 @@ tomcat_download_directory: C:\Windows\Temp\tomcat-build
 tomcat_java_archive: '{{ tomcat_download_directory }}\java.zip'
 tomcat_archive: '{{ tomcat_download_directory }}\tomcat.zip'
 tomcat_service_display_name: Apache Tomcat 9
-tomcat_service_description: UC19 managed Tomcat service
+tomcat_service_description: '{{ requested_use_case }} managed Tomcat service'
 tomcat_log_directory: '{{ tomcat_install_root }}\logs'

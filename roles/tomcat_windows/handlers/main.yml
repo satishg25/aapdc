@@ -1,0 +1,5 @@
+---
+- name: Restart Tomcat
+  ansible.windows.win_service:
+    name: "{{ tomcat_service_name }}"
+    state: restarted

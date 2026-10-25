@@ -2,22 +2,31 @@
 request_id: REQ-SANDBOX-0001
 environment: sandbox
 requestor: satish.gurushanthappa@example.invalid
-requested_use_case: 19
+requested_use_case: 19a
 
 catalogue_contract:
-  '19':
+  '19a':
     topology: standalone
     product: tomcat
-    inventory_group: tomcat_windows
+    ha_type: none
+    inventory_group: tomcat_windows_standalone
     expected_nodes: 1
+  '19b':
+    topology: ha
+    product: tomcat
+    ha_type: shared_platform
+    inventory_group: tomcat_windows_ha
+    expected_nodes: 2
   '22':
     topology: ha
     product: apache
+    ha_type: linux_cluster
     inventory_group: apache_ha
     expected_nodes: 2
   '23':
     topology: standalone
     product: apache
+    ha_type: none
     inventory_group: apache_standalone
     expected_nodes: 1
 
@@ -74,5 +83,12 @@ tomcat_shutdown_port: 8005
 tomcat_tls_enabled: false
 tomcat_https_port: 8443
 tomcat_keystore_path: C:\secure\tomcat.pfx
+
+tomcat_ha_nodes:
+  - tomcat-ha-01
+  - tomcat-ha-02
+tomcat_ha_vip_address: 192.0.2.190
+tomcat_ha_design_approved: false
+tomcat_ha_integration_role: REPLACE_WITH_APPROVED_SHARED_ROLE
 
 uc23_scope_correction_approved: false

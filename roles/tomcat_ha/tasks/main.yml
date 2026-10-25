@@ -1,0 +1,20 @@
+---
+- name: Require the approved UC19b HA design
+  ansible.builtin.assert:
+    that:
+      - requested_use_case | string == '19b'
+      - tomcat_ha_design_approved | bool
+      - tomcat_ha_nodes | length == 2
+      - tomcat_ha_vip_address | ansible.utils.ipaddr
+      - tomcat_ha_integration_role != 'REPLACE_WITH_APPROVED_SHARED_ROLE'
+    fail_msg: >-
+      UC19b requires an approved two-node Windows Tomcat HA design, reserved VIP,
+      and mapped shared platform integration role before execution.
+
+- name: Record the Tomcat HA integration contract
+  ansible.builtin.set_fact:
+    tomcat_ha_contract:
+      nodes: "{{ tomcat_ha_nodes }}"
+      vip: "{{ tomcat_ha_vip_address }}"
+      integration_role: "{{ tomcat_ha_integration_role }}"
+      status: approved_for_shared_role_execution

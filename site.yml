@@ -5,9 +5,13 @@
   roles:
     - role: request_validation
 
-- name: Import UC19 Windows Tomcat workflow
-  ansible.builtin.import_playbook: playbooks/uc19_tomcat_windows.yml
-  when: requested_use_case | string == '19'
+- name: Import UC19a standalone Windows Tomcat workflow
+  ansible.builtin.import_playbook: playbooks/uc19a_tomcat_windows_standalone.yml
+  when: requested_use_case | string == '19a'
+
+- name: Import UC19b HA Windows Tomcat workflow
+  ansible.builtin.import_playbook: playbooks/uc19b_tomcat_windows_ha.yml
+  when: requested_use_case | string == '19b'
 
 - name: Import UC22 Apache HA workflow
   ansible.builtin.import_playbook: playbooks/uc22_apache_ha.yml

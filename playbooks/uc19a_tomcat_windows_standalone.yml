@@ -1,0 +1,22 @@
+---
+- name: UC19a Windows Server 2022 standalone with Tomcat 9.x
+  hosts: tomcat_windows_standalone
+  gather_facts: true
+  vars:
+    expected_use_case: '19a'
+  pre_tasks:
+    - name: Confirm UC19a selection
+      ansible.builtin.assert:
+        that: requested_use_case | string == expected_use_case
+
+  roles:
+    - role: shared_role_hooks
+      vars:
+        shared_role_phase: windows_standalone_provisioning_and_baseline
+    - role: tomcat_windows
+    - role: shared_role_hooks
+      vars:
+        shared_role_phase: operational_onboarding
+    - role: acceptance_validation
+      vars:
+        validation_profile: tomcat_windows_standalone

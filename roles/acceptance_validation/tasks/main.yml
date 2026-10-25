@@ -8,11 +8,24 @@
   failed_when: request_id not in apache_health.content
   when: validation_profile == 'apache_standalone'
 
-- name: Validate Tomcat endpoint
+- name: Validate standalone Tomcat endpoint
   ansible.windows.win_uri:
     url: "http://127.0.0.1:{{ tomcat_http_port }}/"
     status_code: 200
-  when: validation_profile == 'tomcat_windows'
+  when: validation_profile == 'tomcat_windows_standalone'
+
+- name: Validate Tomcat on each HA node
+  ansible.windows.win_uri:
+    url: "http://127.0.0.1:{{ tomcat_http_port }}/"
+    status_code: 200
+  when: validation_profile == 'tomcat_windows_ha'
+
+- name: Validate the UC19b HA endpoint through the VIP
+  ansible.windows.win_uri:
+    url: "http://{{ tomcat_ha_vip_address }}:{{ tomcat_http_port }}/"
+    status_code: 200
+  run_once: true
+  when: validation_profile == 'tomcat_windows_ha'
 
 - name: Validate Apache HA resources
   ansible.builtin.command: pcs status --full
